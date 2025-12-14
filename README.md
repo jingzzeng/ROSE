@@ -42,7 +42,7 @@ This repository contains the demonstration codes for the paper "Robust Sliced In
 
 ##  Reference
 
-- Zeng, J., Min K., Mai, Q. (2025+). Robust Sliced Inverse Regression: Optimal Estimation for Heavy-Tailed Data in High Dimensions.
+- Zeng, J., Min K., and Mai, Q. (2025+). Robust Sliced Inverse Regression: Optimal Estimation for Heavy-Tailed Data in High Dimensions.
   
 - Wang, N., Deng, K., Mai, Q., and Zhang, X. (2024). Leveraging independence in high-dimensional mixed linear regression. Biometrics, 80(3):ujae103.
 
