@@ -1,0 +1,54 @@
+*** Data Dictionary ***
+
+=================================
+* Overview
+
+The CCLE data set is analyzed in Section 7 in paper "Robust Sliced Inverse Regression: Optimal Estimation for Heavy-Tailed Data in High Dimensions". The data set has been investigated by Li et al. (2019), Wang et al. (2024). The full dataset is publicly available at www.broadinstitute.org/ccle.
+
+The original CCLE data set is contained in the files "CCLE_data/CCLE_expression.csv" and "CCLE_data/CCLE_Drugdata.csv", which are kindly shared by the authors of Wang et al. (2024). This data set contains 8-point dose-response curves for 24 chemical compounds across cell lines. Note that the cell lines are not consistent for different chemical compounds. Thus for different chemical compounds, the numbers of cell lines are slightly different.  Analogous to Li et al. (2019), the area under the dose-response, known as the activity area, is used to measure the sensitivity of a chemical compound for each cell line. The expression data of 18,926 genes for each cell line is also recorded in the data set.
+
+In Section 7, we focus on the activity area to the chemical compound 17-AAG. And as in Wang et al. (2024a), we use the subset with the dimension p = 1,000, which consists of genes with the highest correlations with the response.
+
+=================================
+* Variable definitions
+
+- The file "CCLE_expression.csv" contains 18,926 rows and 1,039 columns, describing the gene expression of 18,926 genes on 1,037 cell lines.
+
+    - Column 1: Gene ids.
+    - Column 2: Gene names.
+    - Columns 3-1039: Gene expressions of 1,037 cell lines.
+    - Rows: Each row represents a gene.
+
+- The file "CCLE_Drugdata.csv" contains 11,670 rows and 13 columns, describing the experiment measurements for 504 cell lines against different chemical compounds.
+
+    - Column 1: CCLE cell line names.
+    - Column 2: Primary cell line names.
+    - Column 3: Types of chemical compound used on the cell line.
+    - Column 4: Target protein of each chemical compound.
+    - Column 5: 8-point doses (uM).
+    - Columns 6-7: Activity Data.
+    - Column 8: Number of activity data.
+    - Column 9: Fit type.
+    - Column 10-12: Measurements EC50, IC50, Amax.
+    - Column 13: Activity area.
+
+=================================
+* Preprocessing and variable screening steps
+
+- Step 1: Collect the activity area data of cell lines in the experiment using 17-AAG from the file "CCLE_Drugdata.csv".
+
+- Step 2: Match the cell lines from Step 1 with the gene expression data from the file "CCLE_expression.csv".
+
+- Step 3: Let X and Y represent the gene expression and activity area. Calculate the absolute correlation between response Y and each covariate of X.
+
+- Step 4: Variable screen. Keep the first 1,000 genes in X with the highest absolute correlation with Y. The data are saved as "CCLE_data/17-AAG_X.rda" and "CCLE_data/17-AAG_Y.rda".
+
+=================================
+* References:
+
+- Li, Q., Shi, R., and Liang, F. (2019). Drug sensitivity prediction with high-dimensional mixture regression. PloS one, 14(2):e0212108.
+
+- Wang, N., Deng, K., Mai, Q., and Zhang, X. (2024). Leveraging independence in high-dimensional mixed linear regression. Biometrics, 80(3):ujae103.
+
+
+
