@@ -1,12 +1,12 @@
 # --------------- Description ------------------------- #
 # * This is the main file containing the functions to implement ROSE algorithm for solving the penalized optimization problem (10):
-#   - robustSIR: The main code of ROSE algorithm
+#   - robustSIR: Main code of ROSE algorithm
 #   - cv.robustSIR: Cross-validation function of ROSE algorithm.
-#   - msda, cv.msda: The revised 'msda' and 'cv.msda' functions from package 'msda'. These two functions are used for automatically generating tuning parameter sequences in 'robustSIR' and 'cv.robustSIR' functions.
+#   - msda, cv.msda: Revised ``msda'' and ``cv.msda'' functions from package ``msda''. These two functions are used for automatically generating tuning parameter sequences in ``robustSIR'' and ``cv.robustSIR'' functions.
 #   - MU: Calculates the Sigma and U matrices in eq (9).
-#   - admm: The main code of ADMM algorithm, whose detailed description is presented in Section S.5.
-#   - updataB: Update G iterate in the ADMM algorithm for solving eq. (S.5).
-#   - updateC: Update C iterate in the ADMM algorithm for solving eq. (S.5).
+#   - admm: Main code of the ADMM algorithm, whose detailed description is presented in Section S.5 of the Supplementary Materials.
+#   - updataB: Update the G iterate in the ADMM algorithm for solving eq. (S.5).
+#   - updateC: Update the C iterate in the ADMM algorithm for solving eq. (S.5).
 # ---------------------------------------- #
 
 # ---------- Main program of ROSE algorithm ---------- #
@@ -44,8 +44,8 @@
 # code: Error code. If code == 0, exit normally.
 
 robustSIR <- function(x = NULL, y = NULL, yclass = NULL, d = NULL, categorical=FALSE, H=5, M = NULL, U = NULL, nobs = NULL, nlambda=NULL, lambda.factor=NULL, lam1 = NULL, lam2 = NULL, gamma = NULL, lam1_fac=seq(1.0,0.3, length.out = 10), lam2_fac=seq(0.01,0.3, length.out = 10), eps = 1e-3, maxit = 1e+3, warning.it = 1, true.beta = NULL, ...){
-
-    if(is.null(M) || is.null(U)){
+  
+  if(is.null(M) || is.null(U)){
     if(missing(x) || missing(y)) stop("Missing x or y.")
     if(is.data.frame(x)) x <- as.matrix(x)
     if(is.null(yclass)){
@@ -62,7 +62,10 @@ robustSIR <- function(x = NULL, y = NULL, yclass = NULL, d = NULL, categorical=F
       gamma <- c(10,30,50)
     }
     if(is.null(lam1) || is.null(lam2)){
+      ## Generate the tuning parameter candidates sequences using cv.msda function.
       fit_1 <- cv.msda(x, y, yclass = yclass, nlambda=nlambda, lambda.factor=lambda.factor, nfolds = 5, maxit=1e3, warning.it = warning.it, categorical = categorical)
+      
+      ## Meanwhile, return the estimates of Sigma and U as shown in eq. (9)
       M <- fit_1$M
       U <- fit_1$U
       M_fold <- fit_1$M_fold
@@ -171,7 +174,7 @@ robustSIR <- function(x = NULL, y = NULL, yclass = NULL, d = NULL, categorical=F
 # what: Estimate W in eq (7).
 
 cv.robustSIR <- function(x, y, yclass = NULL, d = NULL, categorical=FALSE, H=5, lambda.factor=NULL, nlambda=NULL, nfolds = 5, fold = NULL, lam1 = NULL, lam2 = NULL, gamma = NULL, lam1_fac=seq(1.0,0.3, length.out = 10), lam2_fac=seq(0.01,0.3, length.out = 10), lambda.type = c("min", "1se.rank", "1se.s"), plot = FALSE, eps = 1e-3, maxit = 1e+3, trace.it = TRUE, solution.path = FALSE, true.beta = NULL, warning.it = 1, solution.path.distance = FALSE, solution.path.s = FALSE, original_y = FALSE, ...){
-
+  
   start_time <- Sys.time() # Record time
   
   if(is.data.frame(x)) x <- as.matrix(x)
@@ -367,17 +370,17 @@ cv.robustSIR <- function(x, y, yclass = NULL, d = NULL, categorical=FALSE, H=5, 
     if(plot){
       dat <- data.frame(x = 1:length(cvm), y = cvm, rank = as.factor(rank_path))
       g <- ggplot(dat, aes(x = x, y = y, col = rank, shape = rank))+
-          geom_point(size = 2)+
-          scale_shape_manual(values = c(1:3,1:3,1:3))+
-          labs(title="Solution path: overall CV error", x="", y="CV error")+
-          theme_bw()+
-          theme(legend.position = "bottom",
-                legend.title = element_blank(),
-                legend.text=element_text(size = 12),
-                legend.key.width = unit(1, 'cm'),
-                plot.title = element_text(size = 16, hjust = 0.5),
-                axis.text = element_text(size = 16),
-                axis.title = element_text(size = 16))
+        geom_point(size = 2)+
+        scale_shape_manual(values = c(1:3,1:3,1:3))+
+        labs(title="Solution path: overall CV error", x="", y="CV error")+
+        theme_bw()+
+        theme(legend.position = "bottom",
+              legend.title = element_blank(),
+              legend.text=element_text(size = 12),
+              legend.key.width = unit(1, 'cm'),
+              plot.title = element_text(size = 16, hjust = 0.5),
+              axis.text = element_text(size = 16),
+              axis.title = element_text(size = 16))
       print(g)
       if(solution.path.distance){
         dat <- data.frame(x = 1:length(cvm), y = dist_path, rank = as.factor(rank_path))
@@ -411,7 +414,7 @@ cv.robustSIR <- function(x, y, yclass = NULL, d = NULL, categorical=FALSE, H=5, 
                 axis.title = element_text(size = 16))
         print(g)
       }
-     }
+    }
   }else{
     beta_path <- NA
     rank_path <- NA
@@ -460,7 +463,7 @@ cv.robustSIR <- function(x, y, yclass = NULL, d = NULL, categorical=FALSE, H=5, 
   ## End of timing in the second stage.
   end_time <- Sys.time()
   time2 <- difftime(end_time, start_time, units = "secs")
-
+  
   ## The overall time.  
   time <- time1 + time2
   
@@ -709,6 +712,9 @@ cv.msda <- function(x, y, yclass=NULL, categorical=FALSE, H=5, lambda.factor=NUL
 }
 
 # ---------- Compute the Sigma and U matrices in eq. (9) ------------- #
+# * This function Implements Algorithm 1 and returns the surrogate predictors.
+# * This function also returns the estimates of Sigma and U as shown in eq. (9).
+# 
 # * Input:
 # x: n x p observation matrix for predictor.
 # y: n-dimensional observation vector for response.
@@ -722,7 +728,7 @@ cv.msda <- function(x, y, yclass=NULL, categorical=FALSE, H=5, lambda.factor=NUL
 # nclass: The number of classes in "y" if "categorical=TRUE" and equals to "H" otherwise.
 # prior: The proportion of each class.
 # gammahat: Estimated gamma in eq (5).
-# what: Estimate W in eq (7).
+# what: Surrogate predictors W in eq (7).
 
 MU <- function(x, y, yclass=NULL, categorical = FALSE, H = 5){
   if(is.null(yclass)){
@@ -743,16 +749,16 @@ MU <- function(x, y, yclass=NULL, categorical = FALSE, H = 5){
   
   xbar <- colMeans(x)
   xc <- x - t(xbar)[rep(1, NROW(x)),]
-  gamma <- apply(xc, 1, function(t){sqrt(mean(t^2))})  # gamma hat.
-  weight <- 1/gamma^2
-  mu <- c((t(weight) %*% x)/sum(weight))
-  w <- (x - t(mu)[rep(1,NROW(x)),])/(gamma %*% t(rep(1,nvars)))
+  gamma <- apply(xc, 1, function(t){sqrt(mean(t^2))})  # estimated gamma in eq. (5)
+  weight <- 1/gamma^2 # estimated weight in eq. (6)
+  mu <- c((t(weight) %*% x)/sum(weight)) # estimated mean vector mu in eq. (6)
+  w <- (x - t(mu)[rep(1,NROW(x)),])/(gamma %*% t(rep(1,nvars))) # surrogate predictors in eq. (7)
   
   wbar <- colMeans(w)
   wc <- (w - t(wbar)[rep(1,NROW(w)), ])
   
-  M <- crossprod(wc)/nobs
-  U <- matrix(0, nvars, nclass)
+  M <- crossprod(wc)/nobs # estimate of Sigma in eq. (9)
+  U <- matrix(0, nvars, nclass) # estimate of U in eq. (9)
   for (i in 1:nclass){
     U[, i] <- colMeans(wc[yclass == cls[i],,drop = FALSE])
   }
@@ -760,7 +766,7 @@ MU <- function(x, y, yclass=NULL, categorical = FALSE, H = 5){
 }
 
 # --------------- ADMM algorithm for solving problem in eq. (10) ----------- #
-# * This function is the main program for solving the optimization in eq. (10), the formulation of subspace estimation in ROSE method.
+# * The main program for implementing Algorithm 2, which solves the optimization in eq. (10), the formulation of subspace estimation in ROSE method. 
 #
 # * Inputs:
 # =======
@@ -850,7 +856,7 @@ admm <- function(M, U, nobs, nvars, lam1, lam2, gam, eps=1e-3, maxit=1e+3, d = N
         repeat{
           step <- step + 1
           
-          # Update B
+          # Update G
           U <- U0 - etaold + gamma * Cold
           out_B <- updateB(M, U, lambda1, opts)
           Bnew <- out_B$Bnew
@@ -860,7 +866,7 @@ admm <- function(M, U, nobs, nvars, lam1, lam2, gam, eps=1e-3, maxit=1e+3, d = N
           # Update C
           Cnew <- updateC(Bnew, lambda2, gamma, etaold)
           
-          # Update U
+          # Update omega
           etanew <- etaold + gamma * (Bnew - Cnew)
           
           # Code 1: success
@@ -918,7 +924,7 @@ admm <- function(M, U, nobs, nvars, lam1, lam2, gam, eps=1e-3, maxit=1e+3, d = N
   return(list(beta = beta_l, B = B_l, rank = rank_l, s = s_l, step = step_l, time = time_l, nlam = nlam_cvg, sv_list_B = sv_list_B, sv_list_C = sv_list_C))
 }
 
-# ------------ Update B iterate in the "admm" algorithm ----------- #
+# ------------ Update G iterate in the "admm" algorithm ----------- #
 # * Inputs:
 # =======
 # M, U: The Sigma and U matrices in eq. (10).
